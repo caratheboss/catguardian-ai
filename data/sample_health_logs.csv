@@ -1,0 +1,5 @@
+breed,age,weight,city,water_intake,food_intake,activity,litter_frequency,appetite,vomiting,hiding_behavior,label
+Persian,12,4.2,Shanghai,310,42,22,5,low,1,1,kidney-risk
+British Shorthair,6,7.1,Singapore,160,92,28,2,normal,0,0,metabolic-risk
+Siamese,4,4.4,New York,175,66,63,3,normal,0,0,healthy
+Maine Coon,8,8.2,Shanghai,205,72,46,1,low,2,1,urinary-risk
