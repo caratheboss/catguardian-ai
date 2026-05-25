@@ -113,7 +113,7 @@ def care_reminder(payload: CareReminderRequest):
         "owner_email": payload.owner_email,
         "message": (
             f"Monthly care planning reminder scheduled for day {payload.reminder_day}. "
-            f"It will remind the owner to review emergency savings or pet insurance options for {payload.cat_name}."
+            f"It will remind the owner to review pet insurance billings and monthly appointments for {payload.cat_name}."
         ),
         "delivery_note": "Connect RESEND_API_KEY or SENDGRID_API_KEY to send real monthly emails.",
     }

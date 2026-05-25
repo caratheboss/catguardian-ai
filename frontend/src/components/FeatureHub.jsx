@@ -21,8 +21,8 @@ const features = [
   },
   {
     id: 'clinical-reasoning',
-    label: 'Clinical Reasoning',
-    description: 'AI explanation based only on structured agent outputs.',
+    label: 'Find Your Veterinary',
+    description: 'Find city-based veterinary options and schedule monthly care reminder emails.',
   },
   {
     id: 'triage',

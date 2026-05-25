@@ -9,7 +9,7 @@ function ClinicalPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [reminder, setReminder] = useState({
-    owner_email: '',
+    owner_email: 'cuiqiyue990323@gmail.com',
     cat_name: 'Luna',
     reminder_day: 1,
   })
@@ -138,9 +138,12 @@ function ClinicalPage() {
 
       <section className="lovely-panel p-6">
         <p className="text-sm font-black uppercase tracking-wide text-[#d86b78]">CareReminderAgent</p>
-        <h2 className="mt-2 text-3xl font-black text-[#3d2b2f]">Monthly Care Planning Email</h2>
+        <div className="risk-title-row mt-2">
+          <img className="risk-title-paw" src="/kitten-paw-cutout.png" alt="" />
+          <h2>Monthly Care Planning Email</h2>
+        </div>
         <p className="mt-3 text-sm font-medium leading-6 text-[#6d5960]">
-          Schedule a monthly reminder to review emergency savings or pet insurance options. This is a demo scheduler until an email provider key is connected.
+          Schedule a monthly reminder to review pet insurance billings and monthly appointments.
         </p>
 
         <form className="mt-5 grid gap-3" onSubmit={scheduleReminder}>
