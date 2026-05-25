@@ -80,12 +80,13 @@ function App() {
           </div>
           <div className="max-w-2xl">
             <p className="text-sm font-medium leading-6 text-[#6d5960]">
-              Detect hidden feline health deterioration before owners notice obvious symptoms.
+              CatGuardian AI is a feline early-warning intelligence system designed to detect subtle health deterioration before obvious symptoms appear. It combines cat profile context, daily monitoring trends, structured ML risk prediction, trusted breed knowledge, and city-based veterinary recommendations with care reminders to support faster, safer owner decisions.
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <span className="positioning-chip">Personalized baseline anomaly</span>
-              <span className="positioning-chip">Structured ML risk engine</span>
-              <span className="positioning-chip">Explainable triage</span>
+              <span className="positioning-chip">Baseline trend monitoring</span>
+              <span className="positioning-chip">Structured ML risk prediction</span>
+              <span className="positioning-chip">Trusted breed intelligence</span>
+              <span className="positioning-chip">Veterinary recommendation and reminders</span>
             </div>
           </div>
         </div>
