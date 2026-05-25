@@ -65,7 +65,7 @@ default_origins = [
 ]
 configured_origins = os.getenv("FRONTEND_ORIGINS", "")
 allow_origins = [origin.strip() for origin in configured_origins.split(",") if origin.strip()] or default_origins
-allow_origin_regex = os.getenv("FRONTEND_ORIGIN_REGEX", r"https://.*\.vercel\.app")
+allow_origin_regex = os.getenv("FRONTEND_ORIGIN_REGEX", r"https://.*\.(vercel|netlify)\.app")
 
 app.add_middleware(
     CORSMiddleware,
