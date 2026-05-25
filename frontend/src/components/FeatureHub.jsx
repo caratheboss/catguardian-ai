@@ -24,11 +24,6 @@ const features = [
     label: 'Find Your Veterinary',
     description: 'Find city-based veterinary options and schedule monthly care reminder emails.',
   },
-  {
-    id: 'triage',
-    label: 'Triage',
-    description: 'Next-step urgency and nearby vet recommendation.',
-  },
 ]
 
 function FeatureHub({ onOpen }) {

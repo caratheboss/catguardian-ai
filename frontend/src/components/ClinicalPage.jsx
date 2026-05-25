@@ -1,19 +1,26 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { API_BASE_URL } from '../config'
 
 const cities = ['上海', '深圳', '北京', '广州']
 
-function ClinicalPage() {
+function ClinicalPage({ catName }) {
   const [city, setCity] = useState('上海')
   const [vetResult, setVetResult] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [reminder, setReminder] = useState({
-    owner_email: 'cuiqiyue990323@gmail.com',
-    cat_name: 'Luna',
-    reminder_day: 1,
+    owner_email: '',
+    cat_name: catName || '',
+    reminder_day: new Date().getDate(),
   })
   const [reminderResult, setReminderResult] = useState(null)
+
+  useEffect(() => {
+    setReminder((current) => ({
+      ...current,
+      cat_name: catName || '',
+    }))
+  }, [catName])
 
   const findVets = async () => {
     setLoading(true)
@@ -42,6 +49,13 @@ function ClinicalPage() {
   const scheduleReminder = async (event) => {
     event.preventDefault()
     setReminderResult(null)
+    if (!reminder.owner_email.trim() || !reminder.cat_name.trim()) {
+      setReminderResult({
+        status: 'input_required',
+        message: 'Please enter both owner email and cat name before scheduling.',
+      })
+      return
+    }
 
     try {
       const response = await fetch(`${API_BASE_URL}/care-reminder`, {
@@ -153,7 +167,7 @@ function ClinicalPage() {
           </label>
           <label className="cute-label">
             Cat name
-            <input className="cute-input" value={reminder.cat_name} onChange={(event) => setReminder((current) => ({ ...current, cat_name: event.target.value }))} />
+            <input className="cute-input" value={reminder.cat_name} onChange={(event) => setReminder((current) => ({ ...current, cat_name: event.target.value }))} placeholder="Type your cat's name" />
           </label>
           <label className="cute-label">
             Reminder day of month

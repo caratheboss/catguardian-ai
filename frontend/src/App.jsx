@@ -6,10 +6,9 @@ import DailyMonitoringPage from './components/DailyMonitoringPage'
 import FeatureHub from './components/FeatureHub'
 import MLRiskPredictPage from './components/MLRiskPredictPage'
 import WelcomeScene from './components/WelcomeScene'
-import VetRecommendations from './components/VetRecommendations'
-import { API_BASE_URL } from './config'
 
 const initialForm = {
+  cat_name: 'Luna',
   breed: 'Persian',
   sex: 'female',
   reproductive_status: 'spayed',
@@ -27,9 +26,6 @@ const initialForm = {
 
 function App() {
   const [form, setForm] = useState(initialForm)
-  const [result, setResult] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
   const [entered, setEntered] = useState(false)
   const [activePage, setActivePage] = useState('hub')
 
@@ -37,55 +33,9 @@ function App() {
     setForm((current) => ({ ...current, [field]: value }))
   }
 
-  const analyze = async (event) => {
-    event.preventDefault()
-    setLoading(true)
-    setError('')
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/analyze`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...form,
-          age: Number(form.age),
-          weight: Number(form.weight),
-          water_intake: Number(form.water_intake),
-          food_intake: Number(form.food_intake),
-          activity: Number(form.activity),
-          litter_frequency: Number(form.litter_frequency),
-          vomiting: Number(form.vomiting),
-          hiding_behavior: Number(form.hiding_behavior),
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Analysis failed')
-      }
-
-      setResult(await response.json())
-    } catch (analysisError) {
-      setError('Analysis service is unavailable. Check backend deployment or VITE_API_BASE_URL.')
-      console.error(analysisError)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   if (!entered) {
     return <WelcomeScene onEnter={() => setEntered(true)} />
   }
-
-  const runAnalysisButton = (
-    <button
-      className="w-full rounded-full bg-[#ee7d8a] px-4 py-3 text-sm font-black text-white shadow-[0_14px_30px_rgba(216,107,120,0.26)] transition hover:-translate-y-0.5 hover:bg-[#d86b78] disabled:cursor-not-allowed disabled:bg-[#c8b8b3]"
-      disabled={loading}
-      onClick={analyze}
-      type="button"
-    >
-      {loading ? 'Analyzing...' : 'Analyze Hidden Risk Signals'}
-    </button>
-  )
 
   const renderActivePage = () => {
     if (activePage === 'hub') {
@@ -113,22 +63,9 @@ function App() {
     }
 
     if (activePage === 'clinical-reasoning') {
-      return <ClinicalPage />
+      return <ClinicalPage catName={form.cat_name} />
     }
-
-    return (
-      <section className="space-y-5">
-        {!result && runAnalysisButton}
-        <section className="lovely-panel p-6">
-          <p className="text-sm font-black uppercase tracking-wide text-[#d86b78]">TriageAgent</p>
-          <h2 className="mt-2 text-3xl font-black text-[#3d2b2f]">{result?.triage_recommendation || 'Waiting for analysis'}</h2>
-          <p className="mt-5 text-sm font-medium leading-6 text-[#6d5960]">
-            Rule-based next step recommendation: Monitor, Vet within 72h, Vet within 24h, or Emergency.
-          </p>
-        </section>
-        <VetRecommendations vets={result?.nearby_vets || []} />
-      </section>
-    )
+    return <FeatureHub onOpen={setActivePage} />
   }
 
   return (

@@ -9,6 +9,16 @@ body {
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  cursor: url("/paw-cursor.svg") 10 4, auto;
+}
+
+a,
+button,
+input,
+select,
+label,
+[role="button"] {
+  cursor: url("/paw-cursor.svg") 10 4, pointer;
 }
 
 button,
@@ -1160,6 +1170,15 @@ select {
   min-height: 100vh;
   overflow: hidden;
   background: #eadac5;
+  opacity: 1;
+  transition: opacity 420ms ease;
+}
+
+.welcome-parallax {
+  position: relative;
+  min-height: 100vh;
+  isolation: isolate;
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1), filter 420ms ease;
 }
 
 .welcome-home-bg {
@@ -1169,12 +1188,26 @@ select {
   height: 100%;
   object-fit: cover;
   object-position: center;
-  transform: scale(1.03);
+}
+
+.welcome-layer-back {
+  z-index: 0;
+  transform: translate3d(calc(var(--mx) * -8px), calc(var(--my) * -6px), 0) scale(1.1);
+  filter: saturate(0.95) contrast(0.94) blur(1.2px);
+  transition: transform 220ms ease-out;
+}
+
+.welcome-layer-mid {
+  z-index: 1;
+  transform: translate3d(calc(var(--mx) * -18px), calc(var(--my) * -10px), 0) scale(1.055);
+  filter: saturate(1.04) contrast(1.02);
+  transition: transform 170ms ease-out;
 }
 
 .welcome-vignette {
   position: absolute;
   inset: 0;
+  z-index: 2;
   background:
     linear-gradient(90deg, rgba(48, 36, 31, 0.2), transparent 34%, rgba(255, 248, 239, 0.18)),
     linear-gradient(180deg, rgba(255, 252, 246, 0.08), rgba(54, 37, 34, 0.24));
@@ -1365,6 +1398,8 @@ select {
 }
 
 .loading-stage {
+  position: relative;
+  z-index: 3;
   display: grid;
   place-items: center;
   padding: 24px;
@@ -1380,6 +1415,8 @@ select {
   padding: clamp(26px, 5vw, 54px);
   box-shadow: 0 28px 80px rgba(58, 39, 35, 0.22);
   backdrop-filter: blur(9px);
+  animation: cinematicCardIn 760ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1), opacity 420ms ease;
 }
 
 .loading-kicker {
@@ -1397,6 +1434,9 @@ select {
   font-size: clamp(2.25rem, 5.4vw, 4.2rem);
   font-weight: 950;
   line-height: 0.95;
+  min-height: 1.95em;
+  letter-spacing: 0;
+  animation: stageTitleIn 460ms ease both;
 }
 
 .loading-characters {
@@ -1414,6 +1454,7 @@ select {
   object-fit: contain;
   transition: left 90ms linear, right 90ms linear, transform 90ms linear;
   will-change: left, right, transform;
+  animation: duoFloat 2.5s ease-in-out infinite;
 }
 
 .loading-person {
@@ -1421,7 +1462,7 @@ select {
   z-index: 3;
   width: clamp(150px, 16vw, 220px);
   filter: saturate(1.04) drop-shadow(0 20px 26px rgba(55, 35, 31, 0.2));
-  transform: translate(-102%, 50%);
+  transform: translate(calc(-102% + var(--mx) * 12px), calc(50% + var(--my) * 5px));
 }
 
 .loading-kitten {
@@ -1429,7 +1470,7 @@ select {
   z-index: 4;
   width: clamp(75px, 8vw, 110px);
   filter: saturate(1.07) drop-shadow(0 18px 24px rgba(92, 54, 43, 0.19));
-  transform: translate(102%, 50%) rotate(-5deg);
+  transform: translate(calc(102% + var(--mx) * 18px), calc(50% + var(--my) * 6px)) rotate(-5deg);
 }
 
 .loading-track {
@@ -1486,7 +1527,61 @@ select {
   margin-left: auto;
   opacity: 0;
   transform: translateY(12px);
-  animation: enterReveal 0.58s ease forwards;
+  animation: enterReveal 0.58s ease forwards, enterPulse 2s ease-in-out 0.58s infinite;
+}
+
+.welcome-scene.is-exiting {
+  opacity: 0;
+}
+
+.welcome-scene.is-exiting .welcome-parallax {
+  transform: scale(1.012);
+  filter: saturate(0.96);
+}
+
+.welcome-scene.is-exiting .loading-card {
+  transform: translateY(8px) scale(0.985);
+  opacity: 0;
+}
+
+@keyframes cinematicCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes stageTitleIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes duoFloat {
+  0%, 100% {
+    margin-bottom: 0;
+  }
+  50% {
+    margin-bottom: 3px;
+  }
+}
+
+@keyframes enterPulse {
+  0%, 100% {
+    box-shadow: 0 18px 34px rgba(79, 42, 43, 0.3), 0 0 0 0 rgba(238, 125, 138, 0.35);
+  }
+  50% {
+    box-shadow: 0 18px 34px rgba(79, 42, 43, 0.32), 0 0 0 10px rgba(238, 125, 138, 0);
+  }
 }
 
 @media (max-width: 760px) {
@@ -1516,5 +1611,23 @@ select {
 
   .loading-enter {
     margin-right: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome-layer-back,
+  .welcome-layer-mid,
+  .loading-card,
+  .loading-card h1,
+  .loading-person,
+  .loading-kitten,
+  .loading-enter {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+
+  .welcome-scene {
+    transition: none !important;
   }
 }

@@ -27,6 +27,10 @@ function CatProfileForm({ form, updateForm }) {
       </div>
       <div className="mt-4 grid gap-3">
         <label className="cute-label">
+          Cat name
+          <input className="cute-input" value={form.cat_name} onChange={(event) => updateForm('cat_name', event.target.value)} placeholder="Type your cat's name" />
+        </label>
+        <label className="cute-label">
           Breed
           <select className="cute-input" value={form.breed} onChange={(event) => updateForm('breed', event.target.value)}>
             {breeds.map((breed) => <option key={breed}>{breed}</option>)}

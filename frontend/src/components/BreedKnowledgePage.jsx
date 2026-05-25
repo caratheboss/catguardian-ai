@@ -78,7 +78,7 @@ function BreedKnowledgePage({ selectedBreed, updateBreed }) {
       setLoading(true)
       setError('')
       const controller = new AbortController()
-      const timeout = window.setTimeout(() => controller.abort(), 35000)
+      const timeout = window.setTimeout(() => controller.abort(), 90000)
 
       try {
         const response = await fetch(`${API_BASE_URL}/breed-knowledge`, {

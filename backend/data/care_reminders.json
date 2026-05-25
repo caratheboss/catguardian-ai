@@ -1,0 +1,20 @@
+[
+  {
+    "owner_email": "1910525688@qq.com",
+    "city": "上海",
+    "cat_name": "Hazelnut",
+    "reminder_day": 25,
+    "updated_at": "2026-05-25T16:09:30.100907",
+    "last_sent_month": "2026-05",
+    "last_sent_at": "2026-05-25T16:38:00.496204"
+  },
+  {
+    "owner_email": "cuiqiyue990323@gmail.com",
+    "city": "北京",
+    "cat_name": "Hazelnut",
+    "reminder_day": 26,
+    "updated_at": "2026-05-25T17:49:29.473721",
+    "last_sent_month": "2026-05",
+    "last_sent_at": "2026-05-25T17:46:32.576259"
+  }
+]

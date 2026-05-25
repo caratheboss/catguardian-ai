@@ -72,7 +72,7 @@ class BreedResearchAgent:
         env_path = Path(__file__).resolve().parents[2] / ".env"
         load_dotenv(env_path)
         self.api_key = os.getenv("OPENAI_API_KEY")
-        self.client = OpenAI(api_key=self.api_key, timeout=30.0, max_retries=0) if self.api_key else None
+        self.client = OpenAI(api_key=self.api_key, timeout=75.0, max_retries=1) if self.api_key else None
 
     def research(self, breed):
         breed_name = str(breed or "Persian")
