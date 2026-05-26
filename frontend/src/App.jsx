@@ -89,7 +89,7 @@ function App() {
     }
 
     if (activePage === 'risk-predict') {
-      return <MLRiskPredictPage />
+      return <MLRiskPredictPage profile={form} />
     }
 
     if (activePage === 'breed-knowledge') {

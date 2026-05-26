@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { API_BASE_URL } from '../config'
 
 const breeds = [
@@ -76,11 +76,24 @@ const labelNames = {
   pain_injury_risk: 'Pain / injury risk',
 }
 
-function MLRiskPredictPage() {
+function MLRiskPredictPage({ profile }) {
   const [mlForm, setMlForm] = useState(initialMlForm)
   const [prediction, setPrediction] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (!profile) {
+      return
+    }
+
+    setMlForm((current) => ({
+      ...current,
+      breed: profile.breed || current.breed,
+      age: profile.age || current.age,
+      weight_kg: profile.weight || current.weight_kg,
+    }))
+  }, [profile])
 
   const updateMlForm = (field, value) => {
     setMlForm((current) => ({ ...current, [field]: value }))
@@ -128,6 +141,12 @@ function MLRiskPredictPage() {
         <p className="mt-3 text-sm font-medium leading-6 text-[#6d5960]">
           Select the clinical inputs used by the XGBoost text classifier.
         </p>
+        {profile?.cat_name && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className="positioning-chip">Cat: {profile.cat_name}</span>
+            <span className="positioning-chip">Profile synced</span>
+          </div>
+        )}
 
         <div className="mt-5 grid gap-3">
           <label className="cute-label">
