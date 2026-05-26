@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import BreedKnowledgePage from './components/BreedKnowledgePage'
 import CatProfileForm from './components/CatProfileForm'
 import ClinicalPage from './components/ClinicalPage'
@@ -23,14 +23,48 @@ const initialForm = {
   vomiting: 1,
   hiding_behavior: 1,
 }
+const PROFILE_STORAGE_KEY = 'catguardian_profile_v1'
 
 function App() {
   const [form, setForm] = useState(initialForm)
   const [entered, setEntered] = useState(false)
   const [activePage, setActivePage] = useState('hub')
+  const [profileSavedAt, setProfileSavedAt] = useState('')
 
   const updateForm = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }))
+  }
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(PROFILE_STORAGE_KEY)
+      if (!raw) {
+        return
+      }
+      const parsed = JSON.parse(raw)
+      setForm((current) => ({ ...current, ...parsed }))
+      if (parsed._savedAt) {
+        setProfileSavedAt(parsed._savedAt)
+      }
+    } catch (error) {
+      console.error('Unable to load saved cat profile', error)
+    }
+  }, [])
+
+  const saveProfile = () => {
+    const savedAt = new Date().toLocaleString()
+    try {
+      window.localStorage.setItem(
+        PROFILE_STORAGE_KEY,
+        JSON.stringify({
+          ...form,
+          _savedAt: savedAt,
+        }),
+      )
+      setProfileSavedAt(savedAt)
+    } catch (error) {
+      console.error('Unable to save cat profile', error)
+    }
   }
 
   if (!entered) {
@@ -45,13 +79,13 @@ function App() {
     if (activePage === 'cat-profile') {
       return (
         <section className="page-grid-single">
-          <CatProfileForm form={form} updateForm={updateForm} />
+          <CatProfileForm form={form} onSave={saveProfile} savedAt={profileSavedAt} updateForm={updateForm} />
         </section>
       )
     }
 
     if (activePage === 'daily-monitoring') {
-      return <DailyMonitoringPage />
+      return <DailyMonitoringPage profile={form} />
     }
 
     if (activePage === 'risk-predict') {
@@ -63,7 +97,7 @@ function App() {
     }
 
     if (activePage === 'clinical-reasoning') {
-      return <ClinicalPage catName={form.cat_name} />
+      return <ClinicalPage catName={form.cat_name} profileCity={form.city} />
     }
     return <FeatureHub onOpen={setActivePage} />
   }

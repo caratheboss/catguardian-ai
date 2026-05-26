@@ -18,7 +18,7 @@ const breeds = [
 const sexes = ['female', 'male']
 const reproductiveStatuses = ['intact', 'spayed', 'unknown']
 
-function CatProfileForm({ form, updateForm }) {
+function CatProfileForm({ form, onSave, savedAt, updateForm }) {
   return (
     <section className="lovely-panel p-4">
       <div className="flex items-center justify-between gap-3">
@@ -59,6 +59,20 @@ function CatProfileForm({ form, updateForm }) {
             Weight kg
             <input className="cute-input" type="number" step="0.1" min="0" value={form.weight} onChange={(event) => updateForm('weight', event.target.value)} />
           </label>
+        </div>
+        <div className="mt-1 grid gap-2">
+          <button
+            className="w-full rounded-full bg-[#ee7d8a] px-4 py-3 text-sm font-black text-white shadow-[0_14px_30px_rgba(216,107,120,0.26)] transition hover:-translate-y-0.5 hover:bg-[#d86b78]"
+            type="button"
+            onClick={onSave}
+          >
+            Save Cat Profile
+          </button>
+          {savedAt && (
+            <p className="text-xs font-semibold text-[#7c6670]">
+              Saved at: {savedAt}
+            </p>
+          )}
         </div>
       </div>
     </section>

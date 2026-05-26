@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import TrendChart from './TrendChart'
 
 const buildDemoLogs = () => {
@@ -25,7 +25,7 @@ const buildDemoLogs = () => {
 
 const latestDemoLog = buildDemoLogs().at(-1)
 
-function DailyMonitoringPage() {
+function DailyMonitoringPage({ profile }) {
   const [logs, setLogs] = useState(buildDemoLogs)
   const [dailyForm, setDailyForm] = useState({
     date: new Date().toISOString().slice(0, 10),
@@ -35,6 +35,16 @@ function DailyMonitoringPage() {
     litter: latestDemoLog.litter,
     weight: latestDemoLog.weight,
   })
+
+  useEffect(() => {
+    if (!profile) {
+      return
+    }
+    setDailyForm((current) => ({
+      ...current,
+      weight: Number(profile.weight || current.weight),
+    }))
+  }, [profile])
 
   const updateDailyForm = (field, value) => {
     setDailyForm((current) => ({ ...current, [field]: value }))
@@ -73,6 +83,11 @@ function DailyMonitoringPage() {
         <p className="mt-3 text-sm font-medium leading-6 text-[#6d5960]">
           Add one daily record. The 7-day and 30-day trend charts update automatically.
         </p>
+        <div className="mt-3 rounded-2xl border border-[#f5d8d3] bg-[#fffaf5] p-3 text-sm font-semibold text-[#6d5960]">
+          Cat: <span className="font-black text-[#3d2b2f]">{profile?.cat_name || '-'}</span>
+          {' '}| Age: <span className="font-black text-[#3d2b2f]">{profile?.age ?? '-'}</span>
+          {' '}| Breed: <span className="font-black text-[#3d2b2f]">{profile?.breed || '-'}</span>
+        </div>
 
         <div className="mt-5 grid gap-3">
           <label className="cute-label">

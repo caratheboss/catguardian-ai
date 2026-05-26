@@ -3,8 +3,8 @@ import { API_BASE_URL } from '../config'
 
 const cities = ['上海', '深圳', '北京', '广州']
 
-function ClinicalPage({ catName }) {
-  const [city, setCity] = useState('上海')
+function ClinicalPage({ catName, profileCity }) {
+  const [city, setCity] = useState(profileCity && cities.includes(profileCity) ? profileCity : '上海')
   const [vetResult, setVetResult] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -21,6 +21,12 @@ function ClinicalPage({ catName }) {
       cat_name: catName || '',
     }))
   }, [catName])
+
+  useEffect(() => {
+    if (profileCity && cities.includes(profileCity)) {
+      setCity(profileCity)
+    }
+  }, [profileCity])
 
   const findVets = async () => {
     setLoading(true)
@@ -87,7 +93,7 @@ function ClinicalPage({ catName }) {
           <h2>Find Trusted Veterinary Help</h2>
         </div>
         <p className="mt-3 text-sm font-medium leading-6 text-[#6d5960]">
-          VetFinderAgent searches Amap veterinary clinic POIs for the selected city, ranks by rating when available, then adds doctor/team background context.
+          VetFindAgent searchs Amap veterinary clinics located in your city, and ranks by rating when available.
         </p>
 
         <div className="mt-5 grid gap-3 md:grid-cols-[1fr_auto]">
@@ -135,7 +141,7 @@ function ClinicalPage({ catName }) {
               <div className="mt-4 grid gap-3 md:grid-cols-2">
                 {vet.doctor_backgrounds.map((doctor) => (
                   <div className="doctor-card" key={doctor.name}>
-                    <p>{doctor.name}</p>
+                    <p>Clinic context</p>
                     <span>{doctor.background}</span>
                   </div>
                 ))}
