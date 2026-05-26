@@ -36,7 +36,7 @@ This is a hackathon MVP. It is wellness monitoring support, not diagnosis, and i
 
 6. **Care Reminder Email**
    - Schedules monthly reminder emails for pet insurance billing checks and monthly appointments.
-   - Uses Gmail SMTP with an App Password when SMTP environment variables are configured.
+   - Uses Resend email API when configured, with Gmail SMTP kept as a local fallback.
 
 ## Multi-Agent Architecture
 
@@ -78,7 +78,8 @@ This architecture keeps factual lookup, ML prediction, rule-based logic, and LLM
 
 - OpenAI API for breed resource search and reasoning support
 - Amap Web Service API for veterinary clinic POI search
-- Gmail SMTP for monthly reminder emails
+- Resend email API for monthly reminder emails
+- Optional Gmail SMTP fallback for local testing
 
 ## Local Development
 
@@ -126,6 +127,8 @@ OPENAI_SEARCH_MODEL=gpt-4.1-mini
 AMAP_WEB_SERVICE_KEY=your_amap_web_service_key
 FRONTEND_ORIGINS=https://cozy-alpaca-2fd14b.netlify.app
 FRONTEND_ORIGIN_REGEX=https://.*\.(vercel|netlify)\.app
+RESEND_API_KEY=your_resend_api_key
+RESEND_FROM_EMAIL=onboarding@resend.dev
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=your_gmail_address

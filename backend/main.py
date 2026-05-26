@@ -1,6 +1,9 @@
 import os
+import json
 import smtplib
 import threading
+import urllib.error
+import urllib.request
 from datetime import datetime
 from email.message import EmailMessage
 from pathlib import Path
@@ -102,6 +105,14 @@ def _smtp_enabled() -> bool:
     return bool(os.getenv("SMTP_USER") and os.getenv("SMTP_APP_PASSWORD"))
 
 
+def _resend_enabled() -> bool:
+    return bool(os.getenv("RESEND_API_KEY"))
+
+
+def _mailer_enabled() -> bool:
+    return _resend_enabled() or _smtp_enabled()
+
+
 def _smtp_settings() -> Dict[str, str]:
     return {
         "host": os.getenv("SMTP_HOST", "smtp.gmail.com"),
@@ -112,12 +123,22 @@ def _smtp_settings() -> Dict[str, str]:
     }
 
 
+def _from_email() -> str:
+    return os.getenv("RESEND_FROM_EMAIL") or os.getenv("SMTP_FROM_EMAIL") or os.getenv("SMTP_USER", "")
+
+
+def _mailer_label() -> str:
+    if _resend_enabled():
+        return "Resend email API is active."
+    if _smtp_enabled():
+        return "Gmail SMTP is active."
+    return "Set RESEND_API_KEY and RESEND_FROM_EMAIL to enable real sending."
+
+
 def _load_reminders() -> List[Dict]:
     if not REMINDER_STORE_PATH.exists():
         return []
     try:
-        import json
-
         with REMINDER_STORE_PATH.open("r", encoding="utf-8") as handle:
             data = json.load(handle)
         if isinstance(data, list):
@@ -128,8 +149,6 @@ def _load_reminders() -> List[Dict]:
 
 
 def _save_reminders(reminders: List[Dict]) -> None:
-    import json
-
     REMINDER_STORE_PATH.parent.mkdir(parents=True, exist_ok=True)
     with REMINDER_STORE_PATH.open("w", encoding="utf-8") as handle:
         json.dump(reminders, handle, indent=2, ensure_ascii=False)
@@ -140,7 +159,6 @@ def _normalize_day(day: int) -> int:
 
 
 def _compose_reminder_email(cat_name: str, city: str, reminder_day: int) -> EmailMessage:
-    settings = _smtp_settings()
     subject = f"CatGuardian Monthly Reminder for {cat_name}"
     body = (
         f"Hello,\n\n"
@@ -153,18 +171,50 @@ def _compose_reminder_email(cat_name: str, city: str, reminder_day: int) -> Emai
     )
     message = EmailMessage()
     message["Subject"] = subject
-    message["From"] = settings["from_email"]
+    message["From"] = _from_email()
     message.set_content(body)
     return message
 
 
-def _send_email(to_email: str, message: EmailMessage) -> None:
+def _send_resend_email(to_email: str, message: EmailMessage) -> None:
+    payload = {
+        "from": message["From"],
+        "to": [to_email],
+        "subject": message["Subject"],
+        "text": message.get_content(),
+    }
+    request = urllib.request.Request(
+        "https://api.resend.com/emails",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {os.getenv('RESEND_API_KEY')}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            if response.status >= 400:
+                raise RuntimeError(f"Resend returned HTTP {response.status}")
+    except urllib.error.HTTPError as exc:
+        error_body = exc.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"Resend returned HTTP {exc.code}: {error_body}") from exc
+
+
+def _send_smtp_email(to_email: str, message: EmailMessage) -> None:
     settings = _smtp_settings()
     message["To"] = to_email
     with smtplib.SMTP(settings["host"], int(settings["port"]), timeout=30) as smtp:
         smtp.starttls()
         smtp.login(settings["user"], settings["password"])
         smtp.send_message(message)
+
+
+def _send_email(to_email: str, message: EmailMessage) -> None:
+    if _resend_enabled():
+        _send_resend_email(to_email, message)
+        return
+    _send_smtp_email(to_email, message)
 
 
 def _should_send_today(reminder: Dict, now: datetime) -> bool:
@@ -179,7 +229,7 @@ def _should_send_today(reminder: Dict, now: datetime) -> bool:
 def _run_reminder_worker() -> None:
     while not SHUTDOWN_EVENT.is_set():
         now = datetime.now()
-        if _smtp_enabled():
+        if _mailer_enabled():
             with REMINDER_STORE_LOCK:
                 reminders = _load_reminders()
                 changed = False
@@ -264,8 +314,8 @@ def care_reminder(payload: CareReminderRequest):
                 reminders[existing_index]["last_sent_at"] = keep_last_sent_at
         _save_reminders(reminders)
 
-    smtp_live = _smtp_enabled()
-    if smtp_live and datetime.now().day == reminder_day:
+    mailer_live = _mailer_enabled()
+    if mailer_live and datetime.now().day == reminder_day:
         try:
             message = _compose_reminder_email(payload.cat_name, payload.city, reminder_day)
             _send_email(payload.owner_email, message)
@@ -290,17 +340,14 @@ def care_reminder(payload: CareReminderRequest):
 
     return {
         "agent": "CareReminderAgent",
-        "status": "scheduled_live" if smtp_live else "scheduled_without_mailer",
+        "status": "scheduled_live" if mailer_live else "scheduled_without_mailer",
         "owner_email": payload.owner_email,
         "message": (
             f"Monthly reminder scheduled for day {reminder_day}. "
             f"It will send to {payload.owner_email} for {payload.cat_name.strip()} in {payload.city} "
             f"to review pet insurance billings and monthly appointments."
         ),
-        "delivery_note": (
-            "Gmail SMTP is active." if smtp_live
-            else "Set SMTP_USER and SMTP_APP_PASSWORD (Gmail app password) to enable real sending."
-        ),
+        "delivery_note": _mailer_label(),
     }
 
 
