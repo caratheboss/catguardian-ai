@@ -138,15 +138,6 @@ function ClinicalPage({ catName, profileCity }) {
                 </div>
               </div>
 
-              <div className="mt-4 grid gap-3 md:grid-cols-2">
-                {vet.doctor_backgrounds.map((doctor) => (
-                  <div className="doctor-card" key={doctor.name}>
-                    <p>Clinic context</p>
-                    <span>{doctor.background}</span>
-                  </div>
-                ))}
-              </div>
-
               <div className="mt-4 flex flex-wrap gap-3">
                 {vet.maps_url && <a className="inline-flex text-sm font-black text-[#d86b78]" href={vet.maps_url} target="_blank" rel="noreferrer">Open map</a>}
                 {vet.website && <a className="inline-flex text-sm font-black text-[#d86b78]" href={vet.website} target="_blank" rel="noreferrer">Clinic website</a>}
