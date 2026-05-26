@@ -188,7 +188,9 @@ def _send_resend_email(to_email: str, message: EmailMessage) -> None:
         data=json.dumps(payload).encode("utf-8"),
         headers={
             "Authorization": f"Bearer {os.getenv('RESEND_API_KEY')}",
+            "Accept": "application/json",
             "Content-Type": "application/json",
+            "User-Agent": "CatGuardianAI/1.0",
         },
         method="POST",
     )
