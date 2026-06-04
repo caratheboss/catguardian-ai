@@ -79,6 +79,9 @@ const labelNames = {
 function MLRiskPredictPage({ profile }) {
   const [mlForm, setMlForm] = useState(initialMlForm)
   const [prediction, setPrediction] = useState(null)
+  const [careGuide, setCareGuide] = useState(null)
+  const [careGuideLoading, setCareGuideLoading] = useState(false)
+  const [careGuideError, setCareGuideError] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -103,6 +106,8 @@ function MLRiskPredictPage({ profile }) {
     event.preventDefault()
     setLoading(true)
     setError('')
+    setCareGuide(null)
+    setCareGuideError('')
 
     try {
       const response = await fetch(`${API_BASE_URL}/ml-predict`, {
@@ -119,7 +124,34 @@ function MLRiskPredictPage({ profile }) {
         throw new Error('ML prediction failed')
       }
 
-      setPrediction(await response.json())
+      const predictionResult = await response.json()
+      setPrediction(predictionResult)
+      setCareGuideLoading(true)
+
+      try {
+        const guideResponse = await fetch(`${API_BASE_URL}/risk-care-guide`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            risk_label: predictionResult.predicted_label,
+            breed: mlForm.breed,
+            medical_history: mlForm.medical_history,
+            symptoms: [1, 2, 3, 4, 5]
+              .map((index) => mlForm[`symptom_${index}`])
+              .filter((symptom) => symptom && symptom !== 'None'),
+          }),
+        })
+
+        if (!guideResponse.ok) {
+          throw new Error('Risk care guide failed')
+        }
+        setCareGuide(await guideResponse.json())
+      } catch (guideError) {
+        setCareGuideError('Care guide is temporarily unavailable. Use the ML result as a monitoring signal and contact a veterinarian for guidance.')
+        console.error(guideError)
+      } finally {
+        setCareGuideLoading(false)
+      }
     } catch (predictionError) {
       setError('ML service is unavailable. Check backend deployment or VITE_API_BASE_URL.')
       console.error(predictionError)
@@ -221,6 +253,63 @@ function MLRiskPredictPage({ profile }) {
                 </div>
               ))}
             </div>
+          </>
+        )}
+      </section>
+
+      <section className="lovely-panel p-5 md:col-span-2">
+        <p className="text-sm font-black uppercase tracking-wide text-[#d86b78]">RiskCareGuideAgent</p>
+        <div className="risk-title-row mt-2">
+          <img className="risk-title-paw" src="/kitten-paw-cutout.png" alt="" />
+          <h2>{careGuide?.title || 'Care information for the top risk signal'}</h2>
+        </div>
+
+        {!prediction && (
+          <p className="mt-3 text-sm font-medium leading-6 text-[#6d5960]">
+            Run the disease signal classifier to receive a short, source-grounded care guide for the highest-percentage risk category.
+          </p>
+        )}
+
+        {careGuideLoading && (
+          <p className="mt-4 rounded-2xl bg-[#fff3e4] p-4 text-sm font-bold text-[#6d5960]">
+            Finding relevant veterinary care resources...
+          </p>
+        )}
+
+        {careGuideError && (
+          <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
+            {careGuideError}
+          </p>
+        )}
+
+        {careGuide && (
+          <>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="positioning-chip">Top signal: {labelNames[careGuide.risk_label] || careGuide.risk_label}</span>
+              <span className="positioning-chip">Agent mode: {careGuide.mode}</span>
+            </div>
+            <p className="mt-4 text-sm font-medium leading-7 text-[#6d5960]">{careGuide.summary}</p>
+            {careGuide.urgent_signs && (
+              <p className="mt-4 rounded-2xl bg-[#fff3e4] p-4 text-sm font-bold leading-6 text-[#6d5960]">
+                {careGuide.urgent_signs}
+              </p>
+            )}
+            <div className="mt-5 grid gap-3 md:grid-cols-2">
+              {careGuide.resources.map((resource) => (
+                <a
+                  className="rounded-2xl border border-[#f5d8d3] bg-[#fffaf5] p-4 transition hover:-translate-y-0.5 hover:border-[#ee7d8a]"
+                  href={resource.url}
+                  key={resource.url}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  <p className="text-xs font-black uppercase tracking-wide text-[#d86b78]">{resource.source}</p>
+                  <p className="mt-2 text-sm font-black text-[#3d2b2f]">{resource.title}</p>
+                  <p className="mt-3 text-sm font-black text-[#d86b78]">Open care resource</p>
+                </a>
+              ))}
+            </div>
+            <p className="mt-4 text-xs font-semibold text-[#7c6670]">{careGuide.safety_note}</p>
           </>
         )}
       </section>

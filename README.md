@@ -23,6 +23,7 @@ This is a hackathon MVP. It is wellness monitoring support, not diagnosis, and i
 3. **Risk Predict**
    - Uses a Python ML pipeline with TF-IDF text features and an XGBoost-style risk classifier.
    - Predicts structured disease-signal categories such as renal, urinary, gastrointestinal, endocrine, respiratory, and pain/injury risk.
+   - Sends the highest-percentage risk signal to RiskCareGuideAgent for a brief, source-grounded care overview and external veterinary resources.
 
 4. **Breed Knowledge Base**
    - Uses OpenAI web search when available.
@@ -44,6 +45,7 @@ The system is organized as multiple focused agents instead of a single chatbot w
 
 - **MonitoringAgent**: deterministic trend and baseline-style signal analysis.
 - **MLRiskAgent**: structured ML risk prediction.
+- **RiskCareGuideAgent**: OpenAI web search for source-grounded care context related to the top ML risk signal.
 - **BreedKnowledgeAgent / BreedResearchAgent**: breed risk lookup and trusted breed resource retrieval.
 - **VetFindAgent**: Amap clinic POI search and rating-based ranking.
 - **CareReminderAgent**: monthly care reminder scheduling and email delivery.

@@ -19,6 +19,7 @@ from agents.breed_research_agent import BreedResearchAgent
 from agents.ml_agent import MLRiskAgent
 from agents.monitoring_agent import MonitoringAgent
 from agents.reasoning_agent import ClinicalReasoningAgent
+from agents.risk_care_agent import RiskCareGuideAgent
 from agents.triage_agent import TriageAgent
 from services.vet_service import VetService
 
@@ -57,6 +58,13 @@ class ClinicalVetRequest(BaseModel):
     city: str
 
 
+class RiskCareGuideRequest(BaseModel):
+    risk_label: str
+    breed: str
+    medical_history: str
+    symptoms: List[str]
+
+
 class CareReminderRequest(BaseModel):
     owner_email: str = Field(min_length=3)
     city: str
@@ -92,6 +100,7 @@ breed_agent = BreedKnowledgeAgent()
 breed_research_agent = BreedResearchAgent()
 triage_agent = TriageAgent()
 reasoning_agent = ClinicalReasoningAgent()
+risk_care_agent = RiskCareGuideAgent()
 vet_service = VetService()
 
 REMINDER_STORE_PATH = Path(__file__).resolve().parent / "data" / "care_reminders.json"
@@ -282,6 +291,11 @@ def breed_knowledge(payload: BreedKnowledgeRequest):
 @app.post("/ml-predict")
 def ml_predict(payload: ClinicalMLInput):
     return ml_agent.predict_clinical_condition(payload.model_dump())
+
+
+@app.post("/risk-care-guide")
+def risk_care_guide(payload: RiskCareGuideRequest):
+    return risk_care_agent.guide(payload.model_dump())
 
 
 @app.post("/clinical-vets")
