@@ -96,7 +96,8 @@ class BreedResearchAgent:
             "insights": insights[:2],
             "cat_health_threads": self._cat_health_threads(),
         }
-        self.cache[breed_name] = result
+        if agent_mode == "OpenAI web search":
+            self.cache[breed_name] = result
         return result
 
     def _source_packets(self, breed):
@@ -115,6 +116,7 @@ class BreedResearchAgent:
         ]
 
     def _llm_web_search(self, breed, source_packets):
+        first_error = ""
         try:
             response = self.client.responses.create(
                 model=os.getenv("OPENAI_SEARCH_MODEL", "gpt-4.1-mini"),
@@ -151,6 +153,10 @@ class BreedResearchAgent:
             insights = self._parse_and_validate_insights(response.output_text)
             if len(insights) >= 2:
                 return insights[:2], "OpenAI web search", ""
+            first_error = (
+                "OpenAI web search returned fewer than two valid resources. "
+                "Each resource must include a title and a real source URL."
+            )
         except Exception as web_search_error:
             first_error = str(web_search_error)
 

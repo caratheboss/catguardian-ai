@@ -160,6 +160,11 @@ function BreedKnowledgePage({ selectedBreed, updateBreed }) {
               Agent mode: demo fallback
             </span>
           )}
+          {!loading && knowledge?.debug_error && (
+            <p className="mt-3 rounded-2xl border border-[#f5d8d3] bg-[#fff3e4] p-3 text-sm font-semibold leading-6 text-[#7c6670]">
+              OpenAI search fallback reason: {knowledge.debug_error}
+            </p>
+          )}
         </div>
 
         {error && <p className="mt-4 rounded-2xl border border-[#f5d8d3] bg-[#fff3e4] p-3 text-sm font-semibold text-[#8b5b37]">{error}</p>}
