@@ -18,8 +18,17 @@ RISK_LABELS = [
 class MLRiskAgent:
     def __init__(self):
         self.model_path = Path(__file__).resolve().parents[2] / "ml" / "model.pkl"
-        self.model = joblib.load(self.model_path) if self.model_path.exists() else None
+        self.model = None
+        self.model_load_error = None
         self.label_encoder = None
+
+        if self.model_path.exists():
+            try:
+                self.model = joblib.load(self.model_path)
+            except Exception as exc:
+                # A stale pickle should not prevent the API and rule fallback from starting.
+                self.model_load_error = f"{type(exc).__name__}: {exc}"
+
         if isinstance(self.model, dict):
             artifact = self.model
             self.model = artifact.get("model")
@@ -97,7 +106,11 @@ class MLRiskAgent:
             "predicted_label": predicted_label,
             "confidence": probabilities[predicted_label],
             "probabilities": probabilities,
-            "model_status": "rule_fallback_train_new_model",
+            "model_status": (
+                "rule_fallback_model_unavailable"
+                if self.model_load_error
+                else "rule_fallback_train_new_model"
+            ),
             "input_text": feature_text,
         }
 

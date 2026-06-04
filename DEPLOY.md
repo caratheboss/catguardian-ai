@@ -13,6 +13,7 @@ This project uses:
    - Root directory: `backend`
    - Build command: `pip install -r requirements.txt`
    - Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+   - Python version: `3.11.9` (also pinned in `backend/.python-version`)
 4. Add backend environment variables:
 
 ```text
@@ -31,6 +32,10 @@ SMTP_APP_PASSWORD=your_gmail_app_password
 SMTP_FROM_EMAIL=your_gmail_address
 REMINDER_POLL_SECONDS=3600
 ```
+
+If Render previously installed different Python or scikit-learn versions, use
+**Manual Deploy -> Clear build cache & deploy** so the pinned model runtime is
+installed from scratch.
 
 Current backend URL:
 
