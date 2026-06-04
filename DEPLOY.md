@@ -17,7 +17,7 @@ This project uses:
 
 ```text
 OPENAI_API_KEY=your_openai_api_key
-OPENAI_MODEL=gpt-4.1-mini
+OPENAI_MODEL=gpt-4.1-nano
 OPENAI_SEARCH_MODEL=gpt-4.1-mini
 AMAP_WEB_SERVICE_KEY=your_amap_web_service_key
 FRONTEND_ORIGINS=https://cozy-alpaca-2fd14b.netlify.app

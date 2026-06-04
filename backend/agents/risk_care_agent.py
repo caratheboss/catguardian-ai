@@ -120,19 +120,25 @@ class RiskCareGuideAgent:
         load_dotenv(env_path)
         api_key = os.getenv("OPENAI_API_KEY")
         self.client = OpenAI(api_key=api_key, timeout=60.0, max_retries=1) if api_key else None
+        self.cache = {}
 
     def guide(self, payload):
         risk_label = str(payload.get("risk_label") or "healthy")
+        cache_key = (risk_label, str(payload.get("breed") or ""))
+        if cache_key in self.cache:
+            return self.cache[cache_key]
+
         fallback = self._fallback(risk_label)
         if not self.client or risk_label == "healthy":
             return fallback
 
         try:
             response = self.client.responses.create(
-                model=os.getenv("OPENAI_SEARCH_MODEL", "gpt-5"),
+                model=os.getenv("OPENAI_SEARCH_MODEL", "gpt-4.1-mini"),
                 tools=[{"type": "web_search"}],
                 tool_choice="auto",
                 include=["web_search_call.action.sources"],
+                max_output_tokens=450,
                 input=[
                     {
                         "role": "system",
@@ -164,10 +170,12 @@ class RiskCareGuideAgent:
             parsed = self._extract_json(response.output_text)
             validated = self._validate(parsed, risk_label)
             if validated:
+                self.cache[cache_key] = validated
                 return validated
         except Exception as exc:
             fallback["debug_error"] = str(exc)
 
+        self.cache[cache_key] = fallback
         return fallback
 
     def _validate(self, parsed, risk_label):

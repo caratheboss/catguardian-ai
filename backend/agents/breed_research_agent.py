@@ -73,9 +73,13 @@ class BreedResearchAgent:
         load_dotenv(env_path)
         self.api_key = os.getenv("OPENAI_API_KEY")
         self.client = OpenAI(api_key=self.api_key, timeout=75.0, max_retries=1) if self.api_key else None
+        self.cache = {}
 
     def research(self, breed):
         breed_name = str(breed or "Persian")
+        if breed_name in self.cache:
+            return self.cache[breed_name]
+
         source_packets = self._source_packets(breed_name)
         if self.client:
             insights, agent_mode, debug_error = self._llm_web_search(breed_name, source_packets)
@@ -84,7 +88,7 @@ class BreedResearchAgent:
             agent_mode = "deterministic fallback"
             debug_error = "OPENAI_API_KEY is missing."
 
-        return {
+        result = {
             "breed": breed_name,
             "llm_agent": agent_mode,
             "debug_error": debug_error,
@@ -92,6 +96,8 @@ class BreedResearchAgent:
             "insights": insights[:2],
             "cat_health_threads": self._cat_health_threads(),
         }
+        self.cache[breed_name] = result
+        return result
 
     def _source_packets(self, breed):
         signals = BREED_SIGNALS.get(breed, BREED_SIGNALS["Persian"])
@@ -111,10 +117,11 @@ class BreedResearchAgent:
     def _llm_web_search(self, breed, source_packets):
         try:
             response = self.client.responses.create(
-                model=os.getenv("OPENAI_SEARCH_MODEL", "gpt-5"),
+                model=os.getenv("OPENAI_SEARCH_MODEL", "gpt-4.1-mini"),
                 tools=[{"type": "web_search"}],
                 tool_choice="auto",
                 include=["web_search_call.action.sources"],
+                max_output_tokens=400,
                 input=[
                     {
                         "role": "system",

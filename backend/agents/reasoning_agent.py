@@ -30,7 +30,8 @@ class ClinicalReasoningAgent:
         }
 
         response = self.client.responses.create(
-            model=os.getenv("OPENAI_MODEL", "gpt-4.1-mini"),
+            model=os.getenv("OPENAI_MODEL", "gpt-4.1-nano"),
+            max_output_tokens=250,
             input=[
                 {
                     "role": "system",
