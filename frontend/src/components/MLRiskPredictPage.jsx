@@ -288,6 +288,11 @@ function MLRiskPredictPage({ profile }) {
               <span className="positioning-chip">Top signal: {labelNames[careGuide.risk_label] || careGuide.risk_label}</span>
               <span className="positioning-chip">Agent mode: {careGuide.mode}</span>
             </div>
+            {careGuide.debug_error && (
+              <p className="mt-4 rounded-2xl border border-[#f5d8d3] bg-[#fff3e4] p-4 text-sm font-semibold leading-6 text-[#7c6670]">
+                OpenAI search fallback reason: {careGuide.debug_error}
+              </p>
+            )}
             <p className="mt-4 text-sm font-medium leading-7 text-[#6d5960]">{careGuide.summary}</p>
             {careGuide.urgent_signs && (
               <p className="mt-4 rounded-2xl bg-[#fff3e4] p-4 text-sm font-bold leading-6 text-[#6d5960]">

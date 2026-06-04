@@ -129,7 +129,10 @@ class RiskCareGuideAgent:
             return self.cache[cache_key]
 
         fallback = self._fallback(risk_label)
-        if not self.client or risk_label == "healthy":
+        if risk_label == "healthy":
+            return fallback
+        if not self.client:
+            fallback["debug_error"] = "OPENAI_API_KEY is missing."
             return fallback
 
         try:
@@ -172,10 +175,13 @@ class RiskCareGuideAgent:
             if validated:
                 self.cache[cache_key] = validated
                 return validated
+            fallback["debug_error"] = (
+                "OpenAI web search returned an incomplete response that did not pass "
+                "the required title, summary, HTTPS resource, and JSON checks."
+            )
         except Exception as exc:
             fallback["debug_error"] = str(exc)
 
-        self.cache[cache_key] = fallback
         return fallback
 
     def _validate(self, parsed, risk_label):
